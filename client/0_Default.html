@@ -33,7 +33,8 @@
 
 <body>
     <div id="app">
-        <!-- id div tag안에서 html코드가 작성되어야 한다 -->
+        <!-- id div tag안에서 html코드가 작성되어야 한다 
+         @@@@ 서버쪽 변수들과 synch하고 실행시킬 것-->
 
     </div>
 </body>
@@ -52,11 +53,13 @@
             // 함수(메소드) - (key : function())
             fnList: function () {
                 let self = this;
+                let param = {}; //data:{} 요기에 넣을 다중 파라미터의 경우 사용
+
                 $.ajax({
                     url: "http://localhost:3009/",
                     dataType: "json",
                     type: "GET",
-                    data: {},
+                    data: param,
                     success: function (data) {
 
                     }

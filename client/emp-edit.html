@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        #app {
+            width: 600px;
+            margin: 30px auto;
+        }
+
+        table,
+        tr,
+        td,
+        th {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: aqua;
+            width: 100px;
+        }
+
+        td {
+            width: 300px;
+
+        }
+
+        /* tr:nth-child(even) {
+            background-color: beige;
+        } */
+
+        .check-btn {
+            margin-left: 5px;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <div id="app">
+        <!-- id div tag안에서 html코드가 작성되어야 한다 
+         @@@@ 서버쪽 변수들과 synch하고 실행시킬 것-->
+
+        <table>
+            <tr>
+                <th>사번</th>
+                <th>
+                    <span v-if="info.empNo != 0"><input type="text" v-model="info.empNo" disabled></span>
+                    <span v-else><input type="text" v-model="info.empNo"></span>
+                    {{info.empNo}}
+                    <span v-if="info.empNo != 0"><button class="check-btn" hidden>중복체크</button></span>
+                    <span v-else><button class="check-btn">중복체크</button></span>
+
+                </th>
+            </tr>
+            <tr>
+                <th>이름</th>
+                <td><input type="text" v-model="info.eName"></td>
+            </tr>
+            <tr>
+                <th>직책</th>
+                <td><input type="text" v-model="info.job"></td>
+            </tr>
+
+            <tr>
+                <th>급여</th>
+                <td><input type="text" v-model="info.sal"></td>
+            </tr>
+
+            <tr>
+                <th>부서</th>
+                <td>
+                    <label><input type="radio" value="10" v-model="info.selectDept">ACCOUNTING </label>
+                    <label><input type="radio" value="20" v-model="info.selectDept">RESERCH </label>
+                    <label><input type="radio" value="30" v-model="info.selectDept">SALES</label>
+                    <label><input type="radio" value="40" v-model="info.selectDept"> OPERATIONs</label>
+                </td>
+            </tr>
+
+        </table>
+        <div>
+            <button @click="fnAdd">추가</button>
+        </div>
+
+    </div>
+</body>
+
+</html>
+
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                // 변수 - (key : value)
+                info: {}
+            };
+        },
+        methods: {
+            // 함수(메소드) - (key : function())
+            fnAdd: function () {
+                let self = this;
+                if (self.info.empNo.length != 4) {
+                    alert("사번은 4글자 입니다.");
+                    return; // 문자입력은 않됨을 확인, 중복확인도 필요함
+                }
+                console.log(self.info);
+                // let param = {}; //data:{} 요기에 넣을 다중 파라미터의 경우 사용
+
+                $.ajax({
+                    url: "http://localhost:3009/emp/insert",
+                    dataType: "json",
+                    type: "GET",
+                    data: self.info, // self.info가 {} type이므로 param대신 그대로 쓸 수 있다.
+                    success: function (data) {
+                        alert("추가되었습니다.");
+                        location.href = "emp-list.html";
+                    }
+                });
+            },
+
+            fnInfo: function () {
+                let self = this;
+
+                $.ajax({
+                    url: "http://localhost:3009/emp/info",
+                    dataType: "json",
+                    type: "GET",
+                    data: { empNo: self.empNo },
+                    success: function (data) {
+                        console.log(data);
+                        self.info = data.empInfo;
+                    }
+                });
+            }
+
+
+
+
+        }, // methods
+        mounted() {
+            // 처음 시작할 때 실행되는 부분
+            let self = this; // 꼭먼저 쓸것
+            const queryParams = new URLSearchParams(window.location.search);
+            self.empNo = queryParams.get('empNo') || '';
+
+            if (self.empNo != "") {    // 수정모드는 insert와 달리 값이 채워져 있어야 한다.
+                self.fnInfo();
+            }
+        }
+    });
+
+    app.mount('#app');
+</script>
