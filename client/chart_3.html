@@ -37,6 +37,8 @@
         <!-- id div tag안에서 html코드가 작성되어야 한다 
          @@@@ 서버쪽 변수들과 synch하고 실행시킬 것-->
 
+        <div id="chart"></div>
+
     </div>
 </body>
 
@@ -47,29 +49,61 @@
         data() {
             return {
                 // 변수 - (key : value)
-                list: []
+                options: {
+                    series: [],
+                    chart: {
+                        width: 380,
+                        type: 'pie',
+                    },
+                    labels: [],
+                    responsive: [{
+                        breakpoint: 480,
+                        options: {
+                            chart: {
+                                width: 200
+                            },
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }]
+                }
             };
         },
         methods: {
             // 함수(메소드) - (key : function())
-            fnList: function () {
+            fnProfList: function () {
                 let self = this;
-                let param = {}; //data:{} 요기에 넣을 다중 파라미터의 경우 사용
-
+                let param = {};
                 $.ajax({
-                    url: "http://localhost:3009/",
+                    url: "http://localhost:3009/prof/list",
                     dataType: "json",
                     type: "GET",
                     data: param,
                     success: function (data) {
 
+                        let payList = [];
+                        let nameList = [];
+                        for (let i = 0; i < data.profList.length; i++) {
+                            self.options.series.push(data.profList[i].PAY);
+                            self.options.labels.push(data.profList[i].NAME);
+                        }
+
+                        var chart = new ApexCharts(document.querySelector("#chart"), self.options);
+                        chart.render();
+
                     }
                 });
             }
+
         }, // methods
         mounted() {
             // 처음 시작할 때 실행되는 부분
             let self = this; // 꼭먼저 쓸것
+
+            self.fnProfList();
+
+
         }
     });
 

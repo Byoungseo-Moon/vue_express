@@ -9,6 +9,11 @@
         integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
+        #app {
+            margin: 50px;
+
+        }
+
         table,
         tr,
         td,
@@ -26,6 +31,12 @@
         tr:nth-child(even) {
             background-color: beige;
         }
+
+        #dept-menu {
+            margin-bottom: 5px;
+            text-align: center;
+            height: 30px;
+        }
     </style>
 
 
@@ -40,9 +51,20 @@
         </div>
         
         !!!!! 실행시키기전에 Server쪽 변수를 Synch해야함-->
+        <div>
+            <select id="dept-menu" v-model="deptNo" @change="fnEmpList">
+                <option value="">::전체::</option>
+                <option value="10">::ACCOUNTING::</option>
+                <option value="30">::SALES::</option>
+                <option value="20">::RESEARCH::</option>
+                <option value="40">::OPERATIONS::</option>
+
+            </select>
+        </div>
 
         <table>
             <tr>
+                <th>선택</th>
                 <th>사번</th>
                 <th>이름</th>
                 <th>직책</th>
@@ -53,8 +75,11 @@
                 <th>삭제</th>
             </tr>
             <tr v-for="item in list">
+                <td><input type="checkbox" :value="item.EMPNO" v-model="selectItems"> </td>
                 <td>{{item.EMPNO}}</td>
-                <td>{{item.ENAME}}</td>
+                <td>
+                    <a href="javascript:;" @click="fnView(item.EMPNO)">{{item.ENAME}}</a>
+                </td>
                 <td>{{item.JOB}}</td>
                 <td>
                     <span v-if="item.SAL>3000" style="color:blue;">{{item.SAL}}</span>
@@ -66,7 +91,12 @@
                 <td><button @click="fnRemove(item.EMPNO)">삭제</button></td>
             </tr>
         </table>
-        <a href="emp-edit.html"><button>추가</button></a>
+
+        <div>
+            <a href="emp-edit.html"><button>추가</button></a>
+            <button @click="fnRemoveAll">선택삭제</button>
+        </div>
+
 
     </div>
 </body>
@@ -78,7 +108,9 @@
         data() {
             return {
                 // 변수 - (key : value)
-                list: []
+                list: [],
+                deptNo: "", // 선택박스 default
+                selectItems: []
             };
         },
         methods: {
@@ -89,7 +121,7 @@
                     url: "http://localhost:3009/emp/list",
                     dataType: "json",
                     type: "GET",
-                    data: {},
+                    data: { deptNo: self.deptNo },
                     success: function (data) {
                         console.log(data);
                         self.list = data.empList;
@@ -119,12 +151,34 @@
 
             fnEdit: function (empNo) {
                 location.href = "emp-edit.html?empNo=" + empNo;
+            },
+
+            fnView: function (empNo) {
+                window.open(`emp-view.html?empNo=${empNo}`, "view", "width=500 height=500");
+            },
+
+            fnRemoveAll: function () {
+                let self = this;
+                console.log(self.selectItems);
+
+                if (!confirm("정말 삭제하겠습니까?")) {
+                    return;
+                }
+
+                $.ajax({
+                    url: "http://localhost:3009/emp/deleteAll",
+                    dataType: "json",
+                    type: "GET",
+                    data: { removeList: self.selectItems },
+                    traditional: true,
+                    success: function (data) {
+                        if (data.result == "success") {
+                            alert("삭제되었습니다.");
+                            self.fnEmpList();
+                        };
+                    }
+                });
             }
-
-
-
-
-
 
 
         }, // methods

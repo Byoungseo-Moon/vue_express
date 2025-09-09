@@ -8,7 +8,6 @@
     <script src="https://code.jquery.com/jquery-3.7.1.js"
         integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <style>
         table,
         tr,
@@ -35,7 +34,13 @@
 <body>
     <div id="app">
         <!-- id div tag안에서 html코드가 작성되어야 한다 
-         @@@@ 서버쪽 변수들과 synch하고 실행시킬 것-->
+         @@@@ 서버쪽 변수들과 synch하고 실행시킬 것
+         사번, 이름 , 직책, 급여, 부서이름-->
+        <div>교수번호 : {{info.PROFNO}}</div>
+        <div>이름 : {{info.NAME}}</div>
+        <div>아이디 : {{info.ID}}</div>
+        <div>급여 : {{info.PAY}}</div>
+        <div>학과이름 : {{info.DNAME}}</div>
 
     </div>
 </body>
@@ -47,29 +52,38 @@
         data() {
             return {
                 // 변수 - (key : value)
-                list: []
+                list: [],
+                profNo: "",
+                info: [],
+                profInfo: []
             };
         },
         methods: {
             // 함수(메소드) - (key : function())
-            fnList: function () {
+            fnInfo: function () {
                 let self = this;
-                let param = {}; //data:{} 요기에 넣을 다중 파라미터의 경우 사용
+                let param = { profNo: self.profNo }; //data:{} 요기에 넣을 다중 파라미터의 경우 사용
 
                 $.ajax({
-                    url: "http://localhost:3009/",
+                    url: "http://localhost:3009/prof/info", // query2 at server
                     dataType: "json",
                     type: "GET",
                     data: param,
                     success: function (data) {
-
+                        self.info = data.profInfo;
                     }
                 });
             }
         }, // methods
+
         mounted() {
             // 처음 시작할 때 실행되는 부분
             let self = this; // 꼭먼저 쓸것
+
+            const queryParams = new URLSearchParams(window.location.search);
+            self.profNo = queryParams.get('profNo') || '';
+
+            self.fnInfo();
         }
     });
 

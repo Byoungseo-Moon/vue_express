@@ -54,45 +54,41 @@
 
         <table>
             <tr>
-                <th>사번</th>
+                <th>교수번호</th>
                 <td>
-                    <span v-if="info.empNo != ''">
-                        <input type="text" v-model="info.empNo">
+                    <span v-if="info.profNo != ''">
+                        <input type="text" v-model="info.profNo">
                         <button class="check-btn">중복체크</button>
                     </span>
                     <span v-else>
-                        <input type="text" v-model="info.empNo" disabled>
+                        <input type="text" v-model="info.profNo" disabled>
                     </span>
                 </td>
             </tr>
             <tr>
                 <th>이름</th>
-                <td><input type="text" v-model="info.eName"></td>
+                <td><input type="text" v-model="info.name"></td>
             </tr>
             <tr>
-                <th>직책</th>
-                <td><input type="text" v-model="info.job"></td>
+                <th>아이디</th>
+                <td><input type="text" v-model="info.id"></td>
+            </tr>
+
+            <tr>
+                <th>직위</th>
+                <td><input type="text" v-model="info.position"></td>
             </tr>
 
             <tr>
                 <th>급여</th>
-                <td><input type="text" v-model="info.sal"></td>
-            </tr>
-
-            <tr>
-                <th>부서</th>
                 <td>
-                    <label><input type="radio" value="10" v-model="info.selectDept">ACCOUNTING </label>
-                    <label><input type="radio" value="20" v-model="info.selectDept">RESERCH </label>
-                    <br>
-                    <label><input type="radio" value="30" v-model="info.selectDept">SALES</label>
-                    <label><input type="radio" value="40" v-model="info.selectDept"> OPERATIONs</label>
+                    <input type="text" v-model="info.pay"></label>
                 </td>
             </tr>
 
         </table>
         <div>
-            <button v-if="empNo ==''" @click="fnAdd">추가</button>
+            <button v-if="profNo ==''" @click="fnAdd">추가2</button>
             <button v-else @click="fnEdit">수정</button>
         </div>
 
@@ -106,28 +102,30 @@
         data() {
             return {
                 // 변수 - (key : value)
-                info: {}
+                info: {},
+                profNo: ""
             };
         },
         methods: {
             // 함수(메소드) - (key : function())
             fnAdd: function () {
                 let self = this;
-                if (self.info.empNo.length != 4) {
-                    alert("사번은 4글자 입니다.");
+                if (self.info.profNo.length != 4) {
+                    alert("교수번호은 4글자 입니다.");
+
                     return; // 문자입력은 않됨을 확인, 중복확인도 필요함
                 }
                 console.log(self.info);
                 // let param = {}; //data:{} 요기에 넣을 다중 파라미터의 경우 사용
 
                 $.ajax({
-                    url: "http://localhost:3009/emp/insert",
+                    url: "http://localhost:3009/prof/insert",
                     dataType: "json",
                     type: "GET",
                     data: self.info, // self.info가 {} type이므로 param대신 그대로 쓸 수 있다.
                     success: function (data) {
                         alert("추가되었습니다.");
-                        location.href = "emp-list.html";
+                        location.href = "prof-list.html";
                     }
                 });
             },
@@ -136,13 +134,13 @@
                 let self = this;
 
                 $.ajax({
-                    url: "http://localhost:3009/emp/info", //query1 at server
+                    url: "http://localhost:3009/prof/info",
                     dataType: "json",
                     type: "GET",
-                    data: { empNo: self.empNo },
+                    data: { profNo: self.profNo },
                     success: function (data) {
                         console.log(data);
-                        self.info = data.empInfo;
+                        self.info = data.profInfo;
                     }
                 });
             },
@@ -154,19 +152,16 @@
                 // let param = {} = self.info; //data:{} 요기에 넣을 다중 파라미터의 경우 사용
 
                 $.ajax({
-                    url: "http://localhost:3009/emp/update",
+                    url: "http://localhost:3009/prof/update",
                     dataType: "json",
                     type: "GET",
                     data: self.info, // self.info가 {} type이므로 param대신 그대로 쓸 수 있다.
                     success: function (data) {
                         alert("수정되었습니다.");
-                        location.href = "emp-list.html";
+                        location.href = "prof-list.html";
                     }
                 });
             }
-
-
-
 
 
         }, // methods
@@ -174,9 +169,9 @@
             // 처음 시작할 때 실행되는 부분
             let self = this; // 꼭먼저 쓸것
             const queryParams = new URLSearchParams(window.location.search);
-            self.empNo = queryParams.get('empNo') || '';
+            self.profNo = queryParams.get('profNo') || '';
 
-            if (self.empNo != "") {    // 수정모드는 insert와 달리 값이 채워져 있어야 한다.
+            if (self.profNo != "") {    // 수정모드는 insert와 달리 값이 채워져 있어야 한다.
                 self.fnInfo();
             }
         }
