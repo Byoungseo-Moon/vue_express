@@ -89,6 +89,7 @@
                 <td>{{item.DNAME}}</td>
                 <td><button @click="fnEdit(item.EMPNO)">수정</button></td>
                 <td><button @click="fnRemove(item.EMPNO)">삭제</button></td>
+
             </tr>
         </table>
 
@@ -111,6 +112,7 @@
                 list: [],
                 deptNo: "", // 선택박스 default
                 selectItems: []
+
             };
         },
         methods: {
@@ -140,9 +142,10 @@
                     dataType: "json",
                     type: "GET",
                     data: { empNo: empNo },
+                    traditional: true,
                     success: function (data) {
                         if (data.result == "success") {
-                            alert("삭제되었습니다.");
+                            alert("삭제되었습니다!");
                             self.fnEmpList();
                         };
                     }
@@ -159,9 +162,14 @@
 
             fnRemoveAll: function () {
                 let self = this;
-                console.log(self.selectItems);
 
-                if (!confirm("정말 삭제하겠습니까?")) {
+                // 한개만 선택이 되는 경우 실행됨
+                if (self.selectItems.length == 1) {
+                    self.fnRemove(self.selectItems);
+                    return;
+                }
+
+                if (!confirm("정말 삭제하겠습니까???")) {
                     return;
                 }
 
@@ -172,8 +180,11 @@
                     data: { removeList: self.selectItems },
                     traditional: true,
                     success: function (data) {
+
+                        self.selectItems = []; // 추가 고침 없이 계속 삭제를 할 때, 비우지 않으면 이전 데이터에 새로운 것이 계속 추가됨
+
                         if (data.result == "success") {
-                            alert("삭제되었습니다.");
+                            alert("삭제되었습니다!!!");
                             self.fnEmpList();
                         };
                     }

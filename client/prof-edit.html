@@ -42,6 +42,10 @@
         .check-btn {
             margin-left: 5px;
         }
+
+        readonly {
+            background-color: black;
+        }
     </style>
 
 
@@ -57,7 +61,8 @@
                 <th>교수번호</th>
                 <td>
                     <span v-if="info.profNo != ''">
-                        <input type="text" v-model="info.profNo">
+                        <input type="text" v-model="info.profNo" readonly
+                            style="border: gray; background-color: rgb(223, 218, 218);">
                         <button class="check-btn">중복체크</button>
                     </span>
                     <span v-else>
@@ -88,7 +93,7 @@
 
         </table>
         <div>
-            <button v-if="profNo ==''" @click="fnAdd">추가2</button>
+            <button v-if="profNo ==''" @click="fnAdd">추가</button>
             <button v-else @click="fnEdit">수정</button>
         </div>
 
@@ -112,7 +117,6 @@
                 let self = this;
                 if (self.info.profNo.length != 4) {
                     alert("교수번호은 4글자 입니다.");
-
                     return; // 문자입력은 않됨을 확인, 중복확인도 필요함
                 }
                 console.log(self.info);

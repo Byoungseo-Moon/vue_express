@@ -128,21 +128,16 @@ app.get('/emp/deleteAll', async (req, res) => {
   const { removeList } = req.query;
 
   let query = "";
-  if (removeList.length = 1) {
-    query = `DELETE FROM EMP WHERE EMPNO = ${removeList}`;
-  } else {
 
-    query = "DELETE FROM EMP WHERE EMPNO IN (";
-    for (let i = 0; i < removeList.length; i++) {
-      query += removeList[i];
-      if (removeList.length - 1 != i) { query += "," };
-    }
-    query += ")";
+  query = "DELETE FROM EMP WHERE EMPNO IN (";
+  for (let i = 0; i < removeList.length; i++) {
+    query += removeList[i];
+    if (removeList.length - 1 != i) { query += "," };
   }
+  query += ")";
 
   try {
     await connection.execute(
-
       query,
       [],
       { autoCommit: true }
@@ -161,20 +156,15 @@ app.get('/prof/deleteAll', async (req, res) => {
   const { removeList } = req.query;
 
   let query = "";
-  if (removeList.length = 1) {
-    query = `DELETE FROM EMP WHERE PROFNO = ${removeList}`;
-  } else {
-    query = "DELETE FROM EMP WHERE PROFNO IN (";
-    for (let i = 0; i < removeList.length; i++) {
-      query += removeList[i];
-      if (removeList.length - 1 != i) { query += "," };
-    }
-    query += ")";
+  query = "DELETE FROM PROFESSOR WHERE PROFNO IN (";
+  for (let i = 0; i < removeList.length; i++) {
+    query += removeList[i];
+    if (removeList.length - 1 != i) { query += "," };
   }
+  query += ")";
 
   try {
     await connection.execute(
-
       query,
       [],
       { autoCommit: true }
@@ -215,7 +205,7 @@ app.get('/emp/insert', async (req, res) => {
 
   try {
     await connection.execute(
-      // INSERT INTO EMP() VALUES (`${profNo}`),
+      // INSERT INTO EMP() VALUES (`${empNo}`),
       `INSERT INTO EMP(EMPNO, ENAME, JOB, SAL, DEPTNO) VALUES(:empNo, :eName, :job, :sal, :selectDept)`,
       [empNo, eName, job, sal, selectDept],
       { autoCommit: true }
@@ -235,7 +225,7 @@ app.get('/prof/insert', async (req, res) => {
 
   try {
     await connection.execute(
-      // INSERT INTO EMP() VALUES (`${profNo}`),
+      // INSERT INTO PRPFESSOR() VALUES (`${profNo}`),
       `INSERT INTO PROFESSOR(PROFNO, NAME, ID, POSITION, PAY) VALUES(:profNo, :name, :id, :position, :pay)`,
       [profNo, name, id, position, pay],
       { autoCommit: true }

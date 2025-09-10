@@ -74,7 +74,7 @@
         </table>
 
         <div>
-            <a href="prof-edit.html"><button>추가1</button></a>
+            <a href="prof-edit.html"><button>추가</button></a>
             <button @click="fnRemoveAll" style="margin-left: 5px;">선택삭제</button>
         </div>
 
@@ -121,9 +121,10 @@
                     dataType: "json",
                     type: "GET",
                     data: param,
+                    traditional: true,
                     success: function (data) {
                         if (data.result == "success") {
-                            alert("삭제되었습니다.");
+                            alert("삭제되었습니다!");
                             self.fnProfList();
                         };
                     }
@@ -140,19 +141,30 @@
 
             fnRemoveAll: function () {
                 let self = this;
-                if (!confirm("정말 삭제하겠습니까?")) {
+
+                // 한개만 선택이 되는 경우 실행됨
+                if (self.selectItems.length == 1) {
+                    self.fnRemove(self.selectItems);
                     return;
                 }
 
-                let param = { removeList: selectItems };
+                if (!confirm("정말 삭제하겠습니까???")) {
+                    return;
+                }
+
+                let param = { removeList: self.selectItems };
                 $.ajax({
                     url: "http://localhost:3009/prof/deleteAll",
                     dataType: "json",
                     type: "GET",
                     data: param,
+                    traditional: true,
                     success: function (data) {
+
+                        self.selectItems = []; // 추가 고침 없이 계속 삭제를 할 때, 비우지 않으면 이전 데이터에 새로운 것이 계속 추가됨
+
                         if (data.result == "success") {
-                            alert("삭제되었습니다.");
+                            alert("삭제되었습니다!!!");
                             self.fnProfList();
                         };
                     }
