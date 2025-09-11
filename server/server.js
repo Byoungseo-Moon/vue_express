@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/emp/list', async (req, res) => {
-  const { deptNo } = req.query;
+  const { pageSize, offset, deptNo } = req.query;
   try {
     let query = "";
     if (deptNo != "" && deptNo != null) {
@@ -49,9 +49,10 @@ app.get('/emp/list', async (req, res) => {
       + `INNER JOIN DEPT D ON E.DEPTNO = D.DEPTNO `
       + query
       + `ORDER BY SAL DESC`;
+    let query3 = query2 + ` OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
 
     // 백틱으로 작성할 필요 있음(변수값을 직접 입력하는 경우를 대비함)
-    const result = await connection.execute(query2);
+    const result = await connection.execute(query3);
     const columnNames = result.metaData.map(column => column.name);
     // 쿼리 결과를 JSON 형태로 변환
     const rows = result.rows.map(row => {
@@ -62,9 +63,15 @@ app.get('/emp/list', async (req, res) => {
       });
       return obj;
     });
+
+    const count = await connection.execute(
+      `SELECT COUNT(*) FROM EMP E`
+    );
+
     res.json({
       result: "success",
-      empList: rows
+      empList: rows,
+      count: count.rows[0][0]
     });
   } catch (error) {
     console.error('Error executing query', error);
@@ -349,6 +356,100 @@ app.get('/prof/update', async (req, res) => {
     res.status(500).send('Error executing insert');
   }
 });
+
+
+app.get('/board/list', async (req, res) => {
+  const { pageSize, offset } = req.query;
+
+  try {
+    const result = await connection.execute(
+      `SELECT B.*, TO_CHAR(CDATETIME, 'YYYY-MM-DD') AS CDATE FROM TBL_BOARD B `
+      + `OFFSET ${offset} ROWS FETCH NEXT ${pageSize} ROWS ONLY`
+    );
+    const columnNames = result.metaData.map(column => column.name);
+    // 쿼리 결과를 JSON 형태로 변환
+    const rows = result.rows.map(row => {
+      // 각 행의 데이터를 컬럼명에 맞게 매핑하여 JSON 객체로 변환
+      const obj = {};
+      columnNames.forEach((columnName, index) => {
+        obj[columnName] = row[index];
+      });
+      return obj;
+    });
+
+    const count = await connection.execute(
+      `SELECT COUNT(*) FROM TBL_BOARD B`
+    );
+
+    // 리턴
+    res.json({
+      result: "success",
+      boardList: rows,
+      count: count.rows[0][0]
+    });
+  } catch (error) {
+    console.error('Error executing query', error);
+    res.status(500).send('Error executing query');
+  }
+});
+
+
+
+app.get('/board/add', async (req, res) => {
+  const { kind, title, contents, userId } = req.query;
+
+  // let query1 = `INSERT INTO TBL_BOARD VALUES(B_SEQ.NEXTVAL, :title, :contents, :userId, 0, 0, :kind, SYSDATE, SYSDATE)`;
+  let query2 = `INSERT INTO TBL_BOARD VALUES(B_SEQ.NEXTVAL, '${title}', '${contents}', '${userId}', 0, 0, '${kind}', SYSDATE, SYSDATE)`;
+
+  try {
+    await connection.execute(query2,
+      // `INSERT INTO TBL_BOARD VALUES(B_SEQ.NEXTVAL, :title, :contents, :userId, 0, 0, :kind, SYSDATE, SYSDATE)`,
+      // [title, contents, userId, kind], --- query1에서 사용
+      [],
+      { autoCommit: true }
+    );
+    res.json({
+      result: "success"
+    });
+  } catch (error) {
+    console.error('Error executing delete', error);
+    res.status(500).send('Error executing insert');
+  }
+});
+
+
+app.get('/board/view', async (req, res) => {
+  const { boardNo } = req.query;
+  try {
+    let query1 = `SELECT B.*, TO_CHAR(CDATETIME, 'YYYY-MM-DD') AS CDATE FROM TBL_BOARD B `
+      + `WHERE BOARDNO = ${boardNo}`;
+    // let query2 = `SELECT EMPNO, ENAME, JOB, SAL, D.DEPTNO, D.DNAME FROM EMP E `
+    //   + `INNER JOIN DEPT D ON E.DEPTNO = D.DEPTNO `
+    //   + `ORDER BY SAL DESC`;
+
+    // 백틱으로 작성할 필요 있음(변수값을 직접 입력하는 경우를 대비함)
+    const result = await connection.execute(query1);
+    const columnNames = result.metaData.map(column => column.name);
+    // 쿼리 결과를 JSON 형태로 변환
+    const rows = result.rows.map(row => {
+      // 각 행의 데이터를 컬럼명에 맞게 매핑하여 JSON 객체로 변환
+      const obj = {};
+      columnNames.forEach((columnName, index) => {
+        obj[columnName] = row[index];
+      });
+      return obj;
+    });
+    res.json({
+      result: "success",
+      info: rows[0]
+    });
+  } catch (error) {
+    console.error('Error executing query', error);
+    res.status(500).send('Error executing query');
+  }
+});
+
+
 
 
 // 서버 시작

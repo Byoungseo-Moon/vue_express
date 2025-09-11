@@ -59,11 +59,11 @@
                     <span v-if="info.empNo != ''">
                         <input type="text" v-model="info.empNo" readonly
                             style="border: gray; background-color: rgb(223, 218, 218);">
-                        <button class="check-btn">중복체크</button>
                     </span>
                     <span v-else>
-                        <input type="text" v-model="info.empNo" disabled>
+                        <input type="text" v-model="info.empNo">
                     </span>
+                    <button class="check-btn">중복체크</button>
                 </td>
             </tr>
             <tr>

@@ -8,6 +8,8 @@
     <script src="https://code.jquery.com/jquery-3.7.1.js"
         integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <link rel="icon" href="/client/favicon.ico">
     <style>
         #app {
             margin: 50px;
@@ -37,6 +39,13 @@
             text-align: center;
             height: 30px;
         }
+
+        .index {
+            margin-right: 10px;
+            text-decoration: none;
+            color: black;
+            font-size: 20px;
+        }
     </style>
 
 
@@ -59,6 +68,15 @@
                 <option value="20">::RESEARCH::</option>
                 <option value="40">::OPERATIONS::</option>
 
+            </select>
+        </div>
+        <div>
+            <select v-model="pageSize" @change="fnEmpList">
+                <option value="">::전체::</option>
+                <option value="3">::3개씩::</option>
+                <option value="6">::6개씩::</option>
+                <option value="9">::9개씩::</option>
+                <option value="12">::12씩::</option>
             </select>
         </div>
 
@@ -89,14 +107,19 @@
                 <td>{{item.DNAME}}</td>
                 <td><button @click="fnEdit(item.EMPNO)">수정</button></td>
                 <td><button @click="fnRemove(item.EMPNO)">삭제</button></td>
-
             </tr>
         </table>
-
         <div>
             <a href="emp-edit.html"><button>추가</button></a>
             <button @click="fnRemoveAll">선택삭제</button>
         </div>
+        <a v-if="page != 1" class="index" href="javascript:;" @click="fnMove(-1)">◀</a>
+        <a class="index" href="javascript:;" v-for="num in index" @click="fnPage(num)">
+            <span v-if="num == page" style="color:blue; font-size: 25px; font-weight: bold;">{{num}}</span>
+            <span v-else>{{num}}</span>
+        </a>
+        <a v-if="page != index" class="index" href="javascript:;" @click="fnMove(1)">▶</a>
+
 
 
     </div>
@@ -111,7 +134,10 @@
                 // 변수 - (key : value)
                 list: [],
                 deptNo: "", // 선택박스 default
-                selectItems: []
+                selectItems: [],
+                index: 0,
+                pageSize: 3,
+                page: 1
 
             };
         },
@@ -119,14 +145,22 @@
             // 함수(메소드) - (key : function())
             fnEmpList: function () {
                 let self = this;
+                let param = {
+                    pageSize: self.pageSize,
+                    offset: (self.page - 1) * self.pageSize,
+                    deptNo: self.deptNo
+                }
+
                 $.ajax({
                     url: "http://localhost:3009/emp/list",
                     dataType: "json",
                     type: "GET",
-                    data: { deptNo: self.deptNo },
+                    data: param,
                     success: function (data) {
                         console.log(data);
                         self.list = data.empList;
+                        self.count = data.count;
+                        self.index = Math.ceil(data.count / self.pageSize);
                     }
                 });
             },
@@ -189,6 +223,18 @@
                         };
                     }
                 });
+            },
+
+            fnPage: function (num) {
+                let self = this;
+                self.page = num;
+                self.fnEmpList();
+            },
+
+            fnMove: function (move) {
+                let self = this;
+                self.page += move;
+                self.fnEmpList();
             }
 
 

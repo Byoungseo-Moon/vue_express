@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        table,
+        tr,
+        td,
+        th {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: aqua;
+        }
+
+        tr:nth-child(even) {
+            background-color: beige;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <div id="app">
+        <!-- id div tag안에서 html코드가 작성되어야 한다 
+         @@@@ 서버쪽 변수들과 synch하고 실행시킬 것-->
+
+        <div>
+            제목 : {{info.TITLE}}
+        </div>
+        <div>
+            내용 : {{info.CONTENTS}}
+            <!-- 내용뿐아니라 태그까지 출력됨 -->
+        </div>
+        <div>
+            내용2 :<div v-html="info.CONTENTS"></div>
+            <!-- 실제 태그가 적용된 것을 출력 v-html -->
+        </div>
+
+    </div>
+</body>
+
+</html>
+
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                // 변수 - (key : value)
+                list: [],
+                boardNo: "",
+                info: {}
+            };
+        },
+        methods: {
+            // 함수(메소드) - (key : function())
+            fnInfo: function () {
+                let self = this;
+                let param = { boardNo: self.boardNo }; //data:{} 요기에 넣을 다중 파라미터의 경우 사용
+
+                $.ajax({
+                    url: "http://localhost:3009/board/view",
+                    dataType: "json",
+                    type: "GET",
+                    data: param,
+                    success: function (data) {
+                        console.log(data);
+                        self.info = data.info;
+
+                    }
+                });
+            }
+        }, // methods
+        mounted() {
+            // 처음 시작할 때 실행되는 부분
+            let self = this; // 꼭먼저 쓸것
+
+            const queryParams = new URLSearchParams(window.location.search);
+            self.boardNo = queryParams.get('boardNo') || '';
+
+            self.fnInfo();
+        }
+    });
+
+    app.mount('#app');
+</script>
